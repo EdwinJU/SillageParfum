@@ -1,4 +1,4 @@
-﻿namespace MiPrimeraApi.Models
+﻿namespace SillageParfumApi.Models
 {
     public class Tarea
     {

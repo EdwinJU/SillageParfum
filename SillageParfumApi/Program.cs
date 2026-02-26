@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using MiPrimeraApi.Models;
+using SillageParfumApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

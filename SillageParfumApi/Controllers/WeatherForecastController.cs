@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace MiPrimeraApi.Controllers
+namespace SillageParfumApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace MiPrimeraApi.Models
+namespace SillageParfumApi.Models
 {
     // Heredamos de DbContext (la clase base de EF Core)
     public class ApplicationDbContext : DbContext

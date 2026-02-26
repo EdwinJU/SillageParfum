@@ -96,9 +96,9 @@ namespace MiPrimeraApi.Controllers
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MiPrimeraApi.Models;
+using SillageParfumApi.Models;
 
-namespace MiPrimeraApi.Controllers
+namespace SillageParfumApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace MiPrimeraApi.Migrations
+namespace SillageParfumApi.Migrations
 {
     /// <inheritdoc />
     public partial class Inicial : Migration

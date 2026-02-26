@@ -1,4 +1,4 @@
-namespace MiPrimeraApi
+namespace SillageParfumApi
 {
     public class WeatherForecast
     {
