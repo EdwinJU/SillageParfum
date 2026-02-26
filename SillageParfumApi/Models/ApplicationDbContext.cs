@@ -13,5 +13,8 @@ namespace SillageParfumApi.Models
         // Un DbSet representa una Tabla en la base de datos.
         // Aquí le decimos que cree una tabla llamada "Tareas" basada en la clase "Tarea"
         public DbSet<Tarea> Tareas { get; set; }
+
+        // Aquí le decimos que cree una tabla llamada "Perfumes" basada en la clase "Perfume"
+        public DbSet<Perfume> Perfumes { get; set; }
     }
 }
