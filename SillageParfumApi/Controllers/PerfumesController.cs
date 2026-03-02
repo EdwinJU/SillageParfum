@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SillageParfumApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SillageParfumApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PerfumesController : ControllerBase
