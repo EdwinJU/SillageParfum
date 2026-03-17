@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using SillageParfumApi.Interfaces;
 using SillageParfumApi.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -10,21 +10,21 @@ namespace SillageParfumApi.Controllers
     [ApiController]
     public class PerfumesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IPerfumeRepository _repository;
 
-        public PerfumesController(ApplicationDbContext context)
+        public PerfumesController(IPerfumeRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: api/Perfumes
-        // Leer todos los perfumes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Perfume>>> GetPerfumes()
         {
             try
             {
-                return await _context.Perfumes.ToListAsync();
+                var perfumes = await _repository.GetAllAsync();
+                return Ok(perfumes);
             }
             catch (Exception ex)
             {
@@ -33,19 +33,13 @@ namespace SillageParfumApi.Controllers
         }
 
         // GET: api/Perfumes/5
-        // Leer un perfume específico por su ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Perfume>> GetPerfume(int id)
         {
             try
             {
-                var perfume = await _context.Perfumes.FindAsync(id);
-
-                if (perfume == null)
-                {
-                    return NotFound();
-                }
-
+                var perfume = await _repository.GetByIdAsync(id);
+                if (perfume == null) return NotFound();
                 return perfume;
             }
             catch (Exception ex)
@@ -55,16 +49,13 @@ namespace SillageParfumApi.Controllers
         }
 
         // POST: api/Perfumes
-        // Crear un nuevo perfume
         [HttpPost]
         public async Task<ActionResult<Perfume>> PostPerfume(Perfume perfume)
         {
             try
             {
-                _context.Perfumes.Add(perfume);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetPerfume), new { id = perfume.Id }, perfume);
+                var created = await _repository.CreateAsync(perfume);
+                return CreatedAtAction(nameof(GetPerfume), new { id = created.Id }, created);
             }
             catch (Exception ex)
             {
@@ -73,32 +64,20 @@ namespace SillageParfumApi.Controllers
         }
 
         // PUT: api/Perfumes/5
-        // Actualizar un perfume existente
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPerfume(int id, Perfume perfume)
         {
             try
             {
                 if (id != perfume.Id)
-                {
                     return BadRequest("El ID de la URL no coincide con el ID del modelo.");
-                }
 
-                perfume.UpdatedAt = DateTime.UtcNow;
-                _context.Entry(perfume).State = EntityState.Modified;
-
-                try
+                var updated = await _repository.UpdateAsync(perfume);
+                if (!updated)
                 {
-                    await _context.SaveChangesAsync();
+                    if (!_repository.Exists(id)) return NotFound();
+                    return StatusCode(500, "Error de concurrencia al actualizar.");
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PerfumeExists(id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-
                 return NoContent();
             }
             catch (Exception ex)
@@ -108,33 +87,19 @@ namespace SillageParfumApi.Controllers
         }
 
         // DELETE: api/Perfumes/5
-        // Eliminar un perfume
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerfume(int id)
         {
             try
             {
-                var perfume = await _context.Perfumes.FindAsync(id);
-                if (perfume == null)
-                {
-                    return NotFound();
-                }
-
-                _context.Perfumes.Remove(perfume);
-                await _context.SaveChangesAsync();
-
+                var deleted = await _repository.DeleteAsync(id);
+                if (!deleted) return NotFound();
                 return NoContent();
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error al eliminar el perfume: {ex.Message}");
             }
-        }
-
-        // Método auxiliar para verificar si el perfume existe
-        private bool PerfumeExists(int id)
-        {
-            return _context.Perfumes.Any(e => e.Id == id);
         }
     }
 }

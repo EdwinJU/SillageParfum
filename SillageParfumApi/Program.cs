@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
-using SillageParfumApi.Models; // <--- EL NOMBRE CORRECTO DE TU PROYECTO
+using SillageParfumApi.Interfaces;
+using SillageParfumApi.Models;
+using SillageParfumApi.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Configuración de Base de Datos
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IPerfumeRepository, PerfumeRepository>();
 
 // 2. Configuración de Identity (Manejo de Usuarios)
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
