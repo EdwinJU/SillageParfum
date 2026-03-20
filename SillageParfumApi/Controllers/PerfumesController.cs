@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using SillageParfumApi.Interfaces;
-using SillageParfumApi.Models;
+using SillageParfumApi.Application.DTOs;
+using SillageParfumApi.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 namespace SillageParfumApi.Controllers
@@ -10,52 +10,70 @@ namespace SillageParfumApi.Controllers
     [ApiController]
     public class PerfumesController : ControllerBase
     {
-        private readonly IPerfumeRepository _repository;
+        // El Cajero ahora se comunica con el Gerente, no con la Bodega
+        private readonly IPerfumeService _perfumeService;
 
-        public PerfumesController(IPerfumeRepository repository)
+        public PerfumesController(IPerfumeService perfumeService)
         {
-            _repository = repository;
+            _perfumeService = perfumeService;
         }
 
         // GET: api/Perfumes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Perfume>>> GetPerfumes()
+        public async Task<ActionResult<IEnumerable<PerfumeResponseDto>>> GetPerfumes()
         {
             try
             {
-                var perfumes = await _repository.GetAllAsync();
+                // Usamos el servicio y devolvemos la lista de DTOs
+                var perfumes = await _perfumeService.ObtenerTodosLosPerfumesAsync();
                 return Ok(perfumes);
             }
             catch (Exception ex)
             {
+                // Conservamos tu manejo de errores intacto
                 return StatusCode(500, $"Error al obtener los perfumes: {ex.Message}");
             }
         }
-
         // GET: api/Perfumes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Perfume>> GetPerfume(int id)
+        public async Task<ActionResult<PerfumeResponseDto>> GetPerfume(int id)
         {
             try
             {
-                var perfume = await _repository.GetByIdAsync(id);
-                if (perfume == null) return NotFound();
-                return perfume;
+                // El Gerente hace el trabajo de buscar y mapear a DTO
+                var perfume = await _perfumeService.ObtenerPerfumePorIdAsync(id);
+
+                // Si no lo encuentra, devolvemos un bonito 404
+                if (perfume == null) return NotFound($"No se encontró el perfume con el ID {id}");
+
+                return Ok(perfume);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error al obtener el perfume: {ex.Message}");
             }
         }
-
         // POST: api/Perfumes
         [HttpPost]
-        public async Task<ActionResult<Perfume>> PostPerfume(Perfume perfume)
+        public async Task<ActionResult> PostPerfume(CrearPerfumeDto perfumeDto)
         {
             try
             {
-                var created = await _repository.CreateAsync(perfume);
-                return CreatedAtAction(nameof(GetPerfume), new { id = created.Id }, created);
+                // El servicio intenta crear el perfume
+                var createdId = await _perfumeService.CrearPerfumeAsync(perfumeDto);
+
+                // 2. Devolvemos un 201 genérico con el ID nuevo
+                //return StatusCode(201, new { mensaje = "Perfume creado exitosamente", id = createdId });
+
+                // Ahora sí usamos CreatedAtAction porque el método GetPerfume ya existe de nuevo.
+                // Esto generará un código 201 y un encabezado 'Location' en la respuesta HTTP.
+                return CreatedAtAction(nameof(GetPerfume), new { id = createdId }, perfumeDto);
+            }
+            catch (ArgumentException argEx)
+            {
+                // Si la Entidad Rica rechaza los datos (ej. precio negativo), 
+                // le devolvemos un 400 Bad Request bonito a React.
+                return BadRequest($"Datos inválidos: {argEx.Message}");
             }
             catch (Exception ex)
             {
@@ -65,20 +83,25 @@ namespace SillageParfumApi.Controllers
 
         // PUT: api/Perfumes/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerfume(int id, Perfume perfume)
+        public async Task<IActionResult> PutPerfume(int id, ActualizarPerfumeDto perfumeDto)
         {
             try
             {
-                if (id != perfume.Id)
+                if (id != perfumeDto.Id)
                     return BadRequest("El ID de la URL no coincide con el ID del modelo.");
 
-                var updated = await _repository.UpdateAsync(perfume);
+                var updated = await _perfumeService.ActualizarPerfumeAsync(perfumeDto);
                 if (!updated)
                 {
-                    if (!_repository.Exists(id)) return NotFound();
-                    return StatusCode(500, "Error de concurrencia al actualizar.");
+                    return NotFound($"No se encontró el perfume con ID {id} para actualizar.");
                 }
-                return NoContent();
+                
+                return NoContent(); // 204 No Content (Éxito, pero no devuelve nada)
+            }
+            catch (ArgumentException argEx)
+            {
+                // Si intentan poner un precio negativo, la Entidad lo rechaza aquí
+                return BadRequest($"Datos inválidos: {argEx.Message}");
             }
             catch (Exception ex)
             {
@@ -92,9 +115,10 @@ namespace SillageParfumApi.Controllers
         {
             try
             {
-                var deleted = await _repository.DeleteAsync(id);
-                if (!deleted) return NotFound();
-                return NoContent();
+                var deleted = await _perfumeService.EliminarPerfumeAsync(id);
+                if (!deleted) return NotFound($"No se encontró el perfume con ID {id} para eliminar.");
+                
+                return NoContent(); // 204 No Content
             }
             catch (Exception ex)
             {

@@ -1,6 +1,6 @@
-using SillageParfumApi.Models;
+﻿using SillageParfumApi.Domain.Entities;
 
-namespace SillageParfumApi.Interfaces
+namespace SillageParfumApi.Domain.Interfaces
 {
     public interface IPerfumeRepository
     {

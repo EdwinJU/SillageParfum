@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SillageParfumApi.Migrations
+namespace SillageParfumApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AgregandoSeguridadIdentity : Migration
+    public partial class MigracionInicialCleanArch : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,8 +67,8 @@ namespace SillageParfumApi.Migrations
                     TopNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     HeartNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BaseNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
                     StockQuantity = table.Column<int>(type: "int", nullable: false),
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),

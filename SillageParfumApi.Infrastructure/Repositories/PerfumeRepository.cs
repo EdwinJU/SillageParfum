@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using SillageParfumApi.Interfaces;
-using SillageParfumApi.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using SillageParfumApi.Domain.Entities;
+using SillageParfumApi.Domain.Interfaces;
+using SillageParfumApi.Infrastructure.Data; // Aquí está tu ApplicationDbContext ahora
 
-namespace SillageParfumApi.Repositories
+namespace SillageParfumApi.Infrastructure.Repositories
 {
     public class PerfumeRepository : IPerfumeRepository
     {
@@ -32,7 +33,9 @@ namespace SillageParfumApi.Repositories
 
         public async Task<bool> UpdateAsync(Perfume perfume)
         {
-            perfume.UpdatedAt = DateTime.UtcNow;
+            // Nota: Aquí quitamos el perfume.UpdatedAt = DateTime.UtcNow; 
+            // porque esa responsabilidad ahora es de la Entidad Rica (Domain)
+
             _context.Entry(perfume).State = EntityState.Modified;
             try
             {

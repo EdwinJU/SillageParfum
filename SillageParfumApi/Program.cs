@@ -1,28 +1,23 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
-using SillageParfumApi.Interfaces;
-using SillageParfumApi.Models;
-using SillageParfumApi.Repositories;
+using SillageParfumApi.Infrastructure; // <--- Importamos nuestra nueva caja negra
 using System.Text;
+using SillageParfumApi.Application.Interfaces;
+using SillageParfumApi.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuración de Base de Datos
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ==========================================
+// 1. MAGIA DE CLEAN ARCHITECTURE
+// ==========================================
+// Le decimos a la capa de infraestructura que se encargue de la base de datos y repositorios
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<IPerfumeService, PerfumeService>();
 
-builder.Services.AddScoped<IPerfumeRepository, PerfumeRepository>();
-
-// 2. Configuración de Identity (Manejo de Usuarios)
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-// 3. Configuración de Autenticación con JWT
+// ==========================================
+// 2. CONFIGURACIONES DE LA WEB API (Frontend / Seguridad)
+// ==========================================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -45,11 +40,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// 4. Configurar Swagger para que acepte Tokens
+// Configurar Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SillageParfumApi", Version = "v1" });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -59,24 +53,19 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Ingresa tu token JWT aquí."
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             new string[] {}
         }
     });
 });
 
-// 5. CORS para React
+// CORS para React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirTodo", policy =>
