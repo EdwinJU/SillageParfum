@@ -12,10 +12,13 @@ namespace SillageParfumApi.Controllers
     {
         // El Cajero ahora se comunica con el Gerente, no con la Bodega
         private readonly IPerfumeService _perfumeService;
+        // Inyectamos el servicio externo para enriquecer los datos de los perfumes
+        private readonly IExternalPerfumeService _externalPerfumeService;
 
-        public PerfumesController(IPerfumeService perfumeService)
+        public PerfumesController(IPerfumeService perfumeService, IExternalPerfumeService externalPerfumeService)
         {
             _perfumeService = perfumeService;
+            _externalPerfumeService = externalPerfumeService;
         }
 
         // GET: api/Perfumes
@@ -125,5 +128,29 @@ namespace SillageParfumApi.Controllers
                 return StatusCode(500, $"Error al eliminar el perfume: {ex.Message}");
             }
         }
+        // NUEVO ENDPOINT: Buscar en internet (RapidAPI)
+        // =======================================================
+        [HttpGet("buscar-externo/{nombre}")]
+        public async Task<ActionResult<PerfumeExternoDto>> BuscarPerfumeEnInternet(string nombre)
+        {
+            try
+            {
+                // El Cajero le pide al nuevo obrero que busque en internet
+                var resultado = await _externalPerfumeService.BuscarEnInternetAsync(nombre);
+
+                if (resultado == null)
+                    return NotFound($"No se encontró información en internet para '{nombre}'");
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al consultar la API externa: {ex.Message}");
+            }
+        }
+
     }
 }
+
+
+    

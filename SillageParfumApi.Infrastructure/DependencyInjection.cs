@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SillageParfumApi.Application.Interfaces;
 using SillageParfumApi.Domain.Interfaces;
 using SillageParfumApi.Infrastructure.Data;
 using SillageParfumApi.Infrastructure.Repositories;
@@ -24,6 +25,9 @@ namespace SillageParfumApi.Infrastructure
 
             // 3. Inyección de tus Repositorios
             services.AddScoped<IPerfumeRepository, PerfumeRepository>();
+
+            // Registramos el servicio externo y le inyectamos automáticamente el HttpClient
+            services.AddHttpClient<IExternalPerfumeService, ExternalServices.RapidApiPerfumeService>();
 
             return services;
         }
