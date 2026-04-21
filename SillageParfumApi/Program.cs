@@ -5,6 +5,7 @@ using SillageParfumApi.Infrastructure; // <--- Importamos nuestra nueva caja neg
 using System.Text;
 using SillageParfumApi.Application.Interfaces;
 using SillageParfumApi.Application.Services;
+using SillageParfumApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("PermitirTodo");
 

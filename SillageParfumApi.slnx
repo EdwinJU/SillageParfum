@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Test/">
+    <Project Path="SillageParfumApi.Domain.Tests/SillageParfumApi.Domain.Tests.csproj" Id="d7b1c81c-2989-4c9c-b2ec-0f442d69d76f" />
+  </Folder>
   <Project Path="SillageParfumApi.Application/SillageParfumApi.Application.csproj" Id="e1a1851b-75bc-4e16-9095-4e60614f3424" />
   <Project Path="SillageParfumApi.Domain/SillageParfumApi.Domain.csproj" Id="2e97d486-537a-466d-aa86-07e31ca353ab" />
   <Project Path="SillageParfumApi.Infrastructure/SillageParfumApi.Infrastructure.csproj" Id="050dd9d5-2fa8-4df0-81db-d171d4291281" />
